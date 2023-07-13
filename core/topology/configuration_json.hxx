@@ -214,6 +214,7 @@ struct traits<couchbase::core::topology::configuration> {
                 if (name == "couchapi") {
                     result.bucket_capabilities.insert(couchbase::core::bucket_capability::couchapi);
                 } else if (name == "collections") {
+                    CB_LOG_WARNING("HERE - COLLECTIONS NAME CONFIG");
                     result.bucket_capabilities.insert(couchbase::core::bucket_capability::collections);
                 } else if (name == "durableWrite") {
                     result.bucket_capabilities.insert(couchbase::core::bucket_capability::durable_write);
@@ -233,6 +234,8 @@ struct traits<couchbase::core::topology::configuration> {
                     result.bucket_capabilities.insert(couchbase::core::bucket_capability::nodes_ext);
                 } else if (name == "xattr") {
                     result.bucket_capabilities.insert(couchbase::core::bucket_capability::xattr);
+                } else if (name == "subdoc.ReplicaRead") { //TODO: Check this works (if bucket capability is necessary)
+                    result.bucket_capabilities.insert(couchbase::core::bucket_capability::replica_read);
                 }
             }
         }
