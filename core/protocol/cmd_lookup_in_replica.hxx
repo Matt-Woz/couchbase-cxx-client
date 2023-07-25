@@ -64,11 +64,6 @@ class lookup_in_replica_request_body
     static const inline client_opcode opcode = client_opcode::subdoc_multi_lookup;
 
     /**
-     * Allow access to XATTRs for deleted documents (instead of returning KEY_ENOENT).
-     */
-    static const inline std::uint8_t doc_flag_access_deleted = 0b0000'0100;
-
-    /**
      * Tells the server to operate on replica vbucket instead of active
      */
     static const inline std::uint8_t doc_flag_replica_read = 0b0010'0000;
@@ -83,13 +78,6 @@ class lookup_in_replica_request_body
 
   public:
     void id(const document_id& id);
-
-    void access_deleted(bool value)
-    {
-        if (value) {
-            flags_ = flags_ | doc_flag_access_deleted;
-        }
-    }
 
     void read_replica(bool value)
     {

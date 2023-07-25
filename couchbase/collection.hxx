@@ -858,7 +858,23 @@ class collection
         return future;
     }
 
-    //TODO: maybe better to use new public API way without initiate_ functions (e.g. search and query and bucket management)
+    /**
+     * Performs lookups to document fragments with default options from all replicas and the active node and returns the result as a vector.
+     *
+     * @tparam Handler type of the handler that implements @ref lookup_in_all_replicas_handler
+     *
+     * @param document_id the outer document ID
+     * @param specs an object that specifies the types of lookups to perform
+     * @param options custom options to modify the lookup options
+     * @param handler callable that implements @ref lookup_in_all_replicas_handler
+     *
+     * @exception errc::key_value::document_not_found the given document id is not found in the collection.
+     * @exception errc::common::ambiguous_timeout
+     * @exception errc::common::unambiguous_timeout
+     *
+     * @since 1.0.0
+     * @committed
+     */
     template<typename Handler>
     void lookup_in_all_replicas(std::string document_id, lookup_in_specs specs, const lookup_in_all_replicas_options& options, Handler&& handler) const
     {
@@ -866,6 +882,21 @@ class collection
           core_, bucket_name_, scope_name_, name_, std::move(document_id), specs.specs(), options.build(), std::forward<Handler>(handler));
     }
 
+    /**
+     * Performs lookups to document fragments with default options from all replicas and the active node and returns the result as a vector.
+     *
+     * @param document_id the outer document ID
+     * @param specs an object that specifies the types of lookups to perform
+     * @param options custom options to modify the lookup options
+     * @return future object that carries result of the operation
+     *
+     * @exception errc::key_value::document_not_found the given document id is not found in the collection.
+     * @exception errc::common::ambiguous_timeout
+     * @exception errc::common::unambiguous_timeout
+     *
+     * @since 1.0.0
+     * @committed
+     */
     [[nodiscard]] auto lookup_in_all_replicas(std::string document_id, lookup_in_specs specs, const lookup_in_all_replicas_options& options = {}) const
       -> std::future<std::pair<subdocument_error_context, lookup_in_all_replicas_result>>
       {
@@ -877,6 +908,22 @@ class collection
           return future;
       }
 
+     /**
+     * Performs lookups to document fragments with default options from all replicas and returns the first found.
+     *
+     * @tparam Handler type of the handler that implements @ref lookup_in_any_replica_handler
+     *
+     * @param document_id the outer document ID
+     * @param specs an object that specifies the types of lookups to perform
+     * @param options custom options to modify the lookup options
+     *
+     * @exception errc::key_value::document_not_found the given document id is not found in the collection.
+     * @exception errc::common::ambiguous_timeout
+     * @exception errc::common::unambiguous_timeout
+     *
+     * @since 1.0.0
+     * @committed
+     */
       template<typename Handler>
       void lookup_in_any_replica(std::string document_id, lookup_in_specs specs, const lookup_in_any_replica_options& options, Handler&& handler) const
       {
@@ -884,6 +931,21 @@ class collection
             core_, bucket_name_, scope_name_, name_, std::move(document_id), specs.specs(), options.build(), std::forward<Handler>(handler));
       }
 
+     /**
+     * Performs lookups to document fragments with default options from all replicas and returns the first found.
+     *
+     * @param document_id the outer document ID
+     * @param specs an object that specifies the types of lookups to perform
+     * @param options custom options to modify the lookup options
+     * @return future object that carries result of the operation
+     *
+     * @exception errc::key_value::document_not_found the given document id is not found in the collection.
+     * @exception errc::common::ambiguous_timeout
+     * @exception errc::common::unambiguous_timeout
+     *
+     * @since 1.0.0
+     * @committed
+     */
       [[nodiscard]] auto lookup_in_any_replica(std::string document_id, lookup_in_specs specs, const lookup_in_any_replica_options& options = {}) const
         -> std::future<std::pair<subdocument_error_context, lookup_in_replica_result>>
         {

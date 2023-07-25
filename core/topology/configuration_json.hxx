@@ -214,7 +214,6 @@ struct traits<couchbase::core::topology::configuration> {
                 if (name == "couchapi") {
                     result.bucket_capabilities.insert(couchbase::core::bucket_capability::couchapi);
                 } else if (name == "collections") {
-                    CB_LOG_WARNING("HERE - COLLECTIONS NAME CONFIG");
                     result.bucket_capabilities.insert(couchbase::core::bucket_capability::collections);
                 } else if (name == "durableWrite") {
                     result.bucket_capabilities.insert(couchbase::core::bucket_capability::durable_write);

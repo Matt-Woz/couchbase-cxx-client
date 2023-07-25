@@ -18,19 +18,25 @@
 #pragma once
 
 #include "core/error_context/key_value.hxx"
+#include "core/impl/subdoc/command.hxx"
 #include "core/io/mcbp_context.hxx"
+#include "core/io/mcbp_traits.hxx"
 #include "core/io/retry_context.hxx"
 #include "core/protocol/client_request.hxx"
+#include "core/protocol/cmd_lookup_in.hxx"
 #include "core/protocol/cmd_lookup_in_replica.hxx"
+#include "core/public_fwd.hxx"
 #include "core/timeout_defaults.hxx"
+
 #include <couchbase/subdocument_error_context.hxx>
+#include <couchbase/lookup_in_result.hxx>
 
 namespace couchbase::core::impl
 {
 struct lookup_in_replica_response {
     struct entry {
         std::string path;
-        codec::binary value;
+        couchbase::codec::binary value;
         std::size_t original_index;
         bool exists;
         protocol::subdoc_opcode opcode;
@@ -51,7 +57,6 @@ struct lookup_in_replica_request {
     document_id id;
     std::vector<couchbase::core::impl::subdoc::command> specs{};
     std::optional<std::chrono::milliseconds> timeout{};
-    bool access_deleted{ false }; //TODO: REmove access deleted
     bool read_replica{ true };
     std::uint16_t partition{};
     std::uint32_t opaque{};
