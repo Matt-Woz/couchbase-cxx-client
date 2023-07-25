@@ -35,7 +35,7 @@ namespace couchbase::core::operations
 struct lookup_in_response {
     struct entry {
         std::string path;
-        couchbase::codec::binary value;
+        codec::binary value;
         std::size_t original_index;
         bool exists;
         protocol::subdoc_opcode opcode;
