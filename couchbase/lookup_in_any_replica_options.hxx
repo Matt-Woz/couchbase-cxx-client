@@ -23,7 +23,7 @@
 #include <couchbase/codec/encoded_value.hxx>
 #include <couchbase/common_options.hxx>
 #include <couchbase/expiry.hxx>
-#include <couchbase/lookup_in_result.hxx>
+#include <couchbase/lookup_in_replica_result.hxx>
 #include <couchbase/store_semantics.hxx>
 #include <couchbase/subdocument_error_context.hxx>
 
