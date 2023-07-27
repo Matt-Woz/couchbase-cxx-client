@@ -69,7 +69,7 @@ initiate_lookup_in_any_replica_operation(std::shared_ptr<cluster> core,
                                          const std::string& scope_name,
                                          const std::string& collection_name,
                                          std::string document_key,
-                                         std::vector<couchbase::core::impl::subdoc::command> specs,
+                                         const std::vector<subdoc::command>& specs,
                                          std::optional<std::chrono::milliseconds> timeout,
                                          movable_lookup_in_any_replica_handler&& handler);
 } // namespace couchbase::core::impl

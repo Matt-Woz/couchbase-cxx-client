@@ -29,3 +29,9 @@
  * couchbase::core::meta::sdk_version() function is available
  */
 #define COUCHBASE_CXX_CLIENT_HAS_SDK_SEMVER 1
+
+/**
+ * Subdoc read from replica is available in the core
+ * couchbase::core::lookup_in_replica support
+ */
+#define COUCHBASE_CXX_CLIENT_CORE_HAS_SUBDOC_READ_REPLICA

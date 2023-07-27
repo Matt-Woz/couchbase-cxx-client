@@ -126,7 +126,7 @@ struct configuration {
 
     [[nodiscard]] bool supports_subdoc_read_replica() const
     {
-        return bucket_capabilities.count(couchbase::core::bucket_capability::replica_read) != 0;
+        return bucket_capabilities.find(bucket_capability::replica_read) != bucket_capabilities.end();
     }
 
     [[nodiscard]] std::size_t index_for_this_node() const;

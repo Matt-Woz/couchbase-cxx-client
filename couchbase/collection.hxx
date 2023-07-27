@@ -28,9 +28,9 @@
 #include <couchbase/get_any_replica_options.hxx>
 #include <couchbase/get_options.hxx>
 #include <couchbase/insert_options.hxx>
-#include <couchbase/lookup_in_options.hxx>
 #include <couchbase/lookup_in_all_replicas_options.hxx>
 #include <couchbase/lookup_in_any_replica_options.hxx>
+#include <couchbase/lookup_in_options.hxx>
 #include <couchbase/lookup_in_specs.hxx>
 #include <couchbase/mutate_in_options.hxx>
 #include <couchbase/mutate_in_specs.hxx>
