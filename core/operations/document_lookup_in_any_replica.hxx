@@ -129,6 +129,7 @@ struct lookup_in_any_replica_request {
                       if (ctx->done_) {
                           return;
                       }
+                      --ctx->expected_responses_;
                       if (resp.ctx.ec()) {
                           if (ctx->expected_responses_ > 0) {
                               // just ignore the response

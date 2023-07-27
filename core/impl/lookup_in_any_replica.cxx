@@ -26,12 +26,12 @@
 namespace couchbase::core::impl
 {
 void
-initiate_lookup_in_any_replica_operation(std::shared_ptr<couchbase::core::cluster> core,
+initiate_lookup_in_any_replica_operation(std::shared_ptr<cluster> core,
                                           const std::string& bucket_name,
                                           const std::string& scope_name,
                                           const std::string& collection_name,
                                           std::string document_key,
-                                          const std::vector<couchbase::core::impl::subdoc::command>& specs,
+                                          const std::vector<subdoc::command>& specs,
                                           lookup_in_any_replica_options::built options,
                                           lookup_in_any_replica_handler&& handler)
 {
@@ -46,12 +46,12 @@ initiate_lookup_in_any_replica_operation(std::shared_ptr<couchbase::core::cluste
 }
 
 void
-initiate_lookup_in_any_replicas_operation(std::shared_ptr<cluster> core,
+initiate_lookup_in_any_replica_operation(std::shared_ptr<cluster> core,
                                           const std::string& bucket_name,
                                           const std::string& scope_name,
                                           const std::string& collection_name,
                                           std::string document_key,
-                                          const std::vector<couchbase::core::impl::subdoc::command>& specs,
+                                          const std::vector<subdoc::command>& specs,
                                           std::optional<std::chrono::milliseconds> timeout,
                                           movable_lookup_in_any_replica_handler&& handler)
 {

@@ -19,7 +19,6 @@
 
 #include <couchbase/lookup_in_all_replicas_options.hxx>
 #include <couchbase/lookup_in_replica_result.hxx>
-#include <utility>
 
 #include "core/document_id.hxx"
 #include "core/utils/movable_function.hxx"
@@ -71,7 +70,7 @@ initiate_lookup_in_all_replicas_operation(std::shared_ptr<cluster> core,
                                           const std::string& scope_name,
                                           const std::string& collection_name,
                                           std::string document_key,
-                                          std::vector<couchbase::core::impl::subdoc::command> specs,
+                                          const std::vector<subdoc::command>& specs,
                                           std::optional<std::chrono::milliseconds> timeout,
                                           movable_lookup_in_all_replicas_handler&& handler);
 } // namespace couchbase::core::impl
