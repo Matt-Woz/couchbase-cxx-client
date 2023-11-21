@@ -73,3 +73,9 @@
 #define COUCHBASE_CXX_CLIENT_HAS_COLLECTION_QUERY_INDEX_MANAGEMENT 1
 
 #define COUCHBASE_CXX_CLIENT_TRANSACTIONS_EXT_PARALLEL_UNSTAGING
+
+/**
+ * Search index management is accessible from the public API
+ * couchbase::cluster::search_indexes() support
+ */
+#define COUCHBASE_CXX_CLIENT_HAS_PUBLIC_SEARCH_INDEX_MANAGEMENT 1
