@@ -263,9 +263,10 @@ set(couchbase_cxx_client_FILES
         core/utils/mutation_token.cxx
         core/utils/split_string.cxx
         core/utils/url_codec.cxx
+        core/impl/allow_querying.cxx
         core/impl/analytics.cxx
-        core/impl/search.cxx
         core/impl/analytics_error_category.cxx
+        core/impl/analyze_document.cxx
         core/impl/append.cxx
         core/impl/best_effort_retry_strategy.cxx
         core/impl/boolean_field_query.cxx
@@ -284,17 +285,20 @@ set(couchbase_cxx_client_FILES
         core/impl/date_range_facet_result.cxx
         core/impl/date_range_query.cxx
         core/impl/decrement.cxx
+        core/impl/disallow_querying.cxx
         core/impl/disjunction_query.cxx
         core/impl/dns_srv_tracker.cxx
         core/impl/drop_bucket.cxx
         core/impl/drop_collection.cxx
         core/impl/drop_query_index.cxx
         core/impl/drop_scope.cxx
+        core/impl/drop_search_index.cxx
         core/impl/exists.cxx
         core/impl/expiry.cxx
         core/impl/fail_fast_retry_strategy.cxx
         core/impl/field_level_encryption_error_category.cxx
         core/impl/flush_bucket.cxx
+        core/impl/freeze_plan.cxx
         core/impl/geo_bounding_box_query.cxx
         core/impl/geo_distance_query.cxx
         core/impl/geo_polygon_query.cxx
@@ -302,12 +306,15 @@ set(couchbase_cxx_client_FILES
         core/impl/get_all_buckets.cxx
         core/impl/get_all_query_indexes.cxx
         core/impl/get_all_replicas.cxx
+        core/impl/get_all_search_indexes.cxx
         core/impl/get_all_scopes.cxx
         core/impl/get_and_lock.cxx
         core/impl/get_and_touch.cxx
         core/impl/get_any_replica.cxx
         core/impl/get_bucket.cxx
+        core/impl/get_indexed_document_count.cxx
         core/impl/get_replica.cxx
+        core/impl/get_search_index.cxx
         core/impl/increment.cxx
         core/impl/insert.cxx
         core/impl/internal_date_range_facet_result.cxx
@@ -339,6 +346,7 @@ set(couchbase_cxx_client_FILES
         core/impl/numeric_range_query.cxx
         core/impl/observe_poll.cxx
         core/impl/observe_seqno.cxx
+        core/impl/pause_ingest.cxx
         core/impl/phrase_query.cxx
         core/impl/prefix_query.cxx
         core/impl/prepend.cxx
@@ -349,8 +357,10 @@ set(couchbase_cxx_client_FILES
         core/impl/regexp_query.cxx
         core/impl/remove.cxx
         core/impl/replace.cxx
+        core/impl/resume_ingest.cxx
         core/impl/retry_action.cxx
         core/impl/retry_reason.cxx
+        core/impl/search.cxx
         core/impl/search_error_category.cxx
         core/impl/streaming_json_lexter_error_category.cxx
         core/impl/subdoc/array_add_unique.cxx
@@ -388,10 +398,12 @@ set(couchbase_cxx_client_FILES
         core/impl/transaction_error_category.cxx
         core/impl/transaction_get_result.cxx
         core/impl/transaction_op_error_category.cxx
+        core/impl/unfreeze_plan.cxx
         core/impl/unlock.cxx
         core/impl/update_bucket.cxx
         core/impl/update_collection.cxx
         core/impl/upsert.cxx
+        core/impl/upsert_search_index.cxx
         core/impl/view_error_category.cxx
         core/impl/watch_query_indexes.cxx
         core/impl/wildcard_query.cxx
