@@ -48,7 +48,9 @@ build_disallow_querying_request(std::string index_name, const disallow_querying_
 }
 
 void
-search_index_manager::disallow_querying(std::string index_name, const couchbase::disallow_querying_search_index_options& options, couchbase::disallow_querying_search_index_handler&& handler) const
+search_index_manager::disallow_querying(std::string index_name,
+                                        const couchbase::disallow_querying_search_index_options& options,
+                                        couchbase::disallow_querying_search_index_handler&& handler) const
 {
     auto request = build_disallow_querying_request(std::move(index_name), options.build());
 

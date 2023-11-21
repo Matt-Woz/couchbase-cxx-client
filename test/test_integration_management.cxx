@@ -3376,8 +3376,8 @@ TEST_CASE("integration: search index management", "[integration]")
                 index.name = alias_name;
                 index.type = "fulltext-alias";
                 index.source_type = "nil";
-                index.params_json = couchbase::core::utils::json::generate(
-                  tao::json::value{ { "targets", { { index1_name, tao::json::empty_object }, { index2_name, tao::json::empty_object } } } });
+                index.params_json = couchbase::core::utils::json::generate(tao::json::value{
+                  { "targets", { { index1_name, tao::json::empty_object }, { index2_name, tao::json::empty_object } } } });
                 if (integration.cluster_version().is_serverless_config_profile()) {
                     index.plan_params_json = serverless_plan_params;
                 }
@@ -3431,8 +3431,8 @@ TEST_CASE("integration: search index management", "[integration]")
                                resp.indexes.begin(), resp.indexes.end(), [&index1_name](const auto& i) { return i.name == index1_name; }));
                 REQUIRE(1 == std::count_if(
                                resp.indexes.begin(), resp.indexes.end(), [&index2_name](const auto& i) { return i.name == index2_name; }));
-                REQUIRE(1 ==
-                        std::count_if(resp.indexes.begin(), resp.indexes.end(), [&alias_name](const auto& i) { return i.name == alias_name; }));
+                REQUIRE(1 == std::count_if(
+                               resp.indexes.begin(), resp.indexes.end(), [&alias_name](const auto& i) { return i.name == alias_name; }));
             }
 
             {
@@ -3596,8 +3596,7 @@ TEST_CASE("integration: search index management", "[integration]")
                 auto [ctx, indexes] = c.search_indexes().get_all_indexes().get();
                 REQUIRE_SUCCESS(ctx.ec());
                 REQUIRE_FALSE(indexes.empty());
-                REQUIRE(1 ==
-                        std::count_if(indexes.begin(), indexes.end(), [&index_name](const auto& i) { return i.name == index_name; }));
+                REQUIRE(1 == std::count_if(indexes.begin(), indexes.end(), [&index_name](const auto& i) { return i.name == index_name; }));
             }
         }
         SECTION("control")
@@ -3693,38 +3692,37 @@ TEST_CASE("integration: search index management analyze document", "[integration
         SKIP("cluster does not support search analyze");
     }
 
-
     SECTION("core api")
     {
         auto index_name = test::utils::uniq_id("index");
-          {
-              couchbase::core::management::search::index index;
-              index.name = index_name;
-              index.type = "fulltext-index";
-              index.source_type = "couchbase";
-              index.source_name = integration.ctx.bucket;
-              if (integration.cluster_version().is_serverless_config_profile()) {
-                  index.plan_params_json = serverless_plan_params;
-              }
-              couchbase::core::operations::management::search_index_upsert_request req{};
-              req.index = index;
-              auto resp = test::utils::execute(integration.cluster, req);
-              REQUIRE_SUCCESS(resp.ctx.ec);
-          }
+        {
+            couchbase::core::management::search::index index;
+            index.name = index_name;
+            index.type = "fulltext-index";
+            index.source_type = "couchbase";
+            index.source_name = integration.ctx.bucket;
+            if (integration.cluster_version().is_serverless_config_profile()) {
+                index.plan_params_json = serverless_plan_params;
+            }
+            couchbase::core::operations::management::search_index_upsert_request req{};
+            req.index = index;
+            auto resp = test::utils::execute(integration.cluster, req);
+            REQUIRE_SUCCESS(resp.ctx.ec);
+        }
 
-          REQUIRE(test::utils::wait_for_search_pindexes_ready(integration.cluster, integration.ctx.bucket, index_name));
+        REQUIRE(test::utils::wait_for_search_pindexes_ready(integration.cluster, integration.ctx.bucket, index_name));
 
-          couchbase::core::operations::management::search_index_analyze_document_response resp;
-          bool operation_completed = test::utils::wait_until([&integration, &index_name, &resp]() {
-              couchbase::core::operations::management::search_index_analyze_document_request req{};
-              req.index_name = index_name;
-              req.encoded_document = R"({ "name": hello world })";
-              resp = test::utils::execute(integration.cluster, req);
-              return resp.ctx.ec != couchbase::errc::common::internal_server_failure;
-          });
-          REQUIRE(operation_completed);
-          REQUIRE_SUCCESS(resp.ctx.ec);
-          REQUIRE_FALSE(resp.analysis.empty());
+        couchbase::core::operations::management::search_index_analyze_document_response resp;
+        bool operation_completed = test::utils::wait_until([&integration, &index_name, &resp]() {
+            couchbase::core::operations::management::search_index_analyze_document_request req{};
+            req.index_name = index_name;
+            req.encoded_document = R"({ "name": hello world })";
+            resp = test::utils::execute(integration.cluster, req);
+            return resp.ctx.ec != couchbase::errc::common::internal_server_failure;
+        });
+        REQUIRE(operation_completed);
+        REQUIRE_SUCCESS(resp.ctx.ec);
+        REQUIRE_FALSE(resp.analysis.empty());
     }
     SECTION("public api")
     {
@@ -3746,9 +3744,9 @@ TEST_CASE("integration: search index management analyze document", "[integration
             tao::json::value basic_doc = {
                 { "name", "hello world" },
             };
-              result = c.search_indexes().analyze_document(index_name, basic_doc).get();
-              return result.first.ec() != couchbase::errc::common::internal_server_failure;
-          });
+            result = c.search_indexes().analyze_document(index_name, basic_doc).get();
+            return result.first.ec() != couchbase::errc::common::internal_server_failure;
+        });
         REQUIRE(operation_completed);
         REQUIRE_SUCCESS(result.first.ec());
         REQUIRE_FALSE(result.second.empty());

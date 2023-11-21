@@ -48,7 +48,9 @@ build_unfreeze_plan_request(std::string index_name, const unfreeze_plan_search_i
 }
 
 void
-search_index_manager::unfreeze_plan(std::string index_name, const couchbase::unfreeze_plan_search_index_options& options, couchbase::unfreeze_plan_search_index_handler&& handler) const
+search_index_manager::unfreeze_plan(std::string index_name,
+                                    const couchbase::unfreeze_plan_search_index_options& options,
+                                    couchbase::unfreeze_plan_search_index_handler&& handler) const
 {
     auto request = build_unfreeze_plan_request(std::move(index_name), options.build());
 

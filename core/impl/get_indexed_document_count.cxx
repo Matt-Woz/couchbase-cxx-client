@@ -48,14 +48,16 @@ build_get_documents_count_request(std::string index_name, const get_indexed_sear
 }
 
 void
-search_index_manager::get_indexed_documents_count(std::string index_name, const get_indexed_search_index_options& options, couchbase::get_indexed_search_index_handler&& handler) const
+search_index_manager::get_indexed_documents_count(std::string index_name,
+                                                  const get_indexed_search_index_options& options,
+                                                  couchbase::get_indexed_search_index_handler&& handler) const
 {
     auto request = build_get_documents_count_request(std::move(index_name), options.build());
 
     core_->execute(std::move(request),
                    [handler = std::move(handler)](core::operations::management::search_index_get_documents_count_response resp) mutable {
                        return handler(build_context(resp), resp.count);
-    });
+                   });
 }
 
 auto

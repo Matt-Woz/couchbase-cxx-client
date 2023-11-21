@@ -48,14 +48,16 @@ build_pause_ingest_request(std::string index_name, const pause_ingest_search_ind
 }
 
 void
-search_index_manager::pause_ingest(std::string index_name, const couchbase::pause_ingest_search_index_options& options, couchbase::pause_ingest_search_index_handler&& handler) const
+search_index_manager::pause_ingest(std::string index_name,
+                                   const couchbase::pause_ingest_search_index_options& options,
+                                   couchbase::pause_ingest_search_index_handler&& handler) const
 {
     auto request = build_pause_ingest_request(std::move(index_name), options.build());
 
     core_->execute(std::move(request),
                    [handler = std::move(handler)](core::operations::management::search_index_control_ingest_response resp) mutable {
                        return handler(build_context(resp));
-    });
+                   });
 }
 
 auto

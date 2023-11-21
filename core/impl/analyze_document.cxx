@@ -44,7 +44,9 @@ static core::operations::management::search_index_analyze_document_request
 build_analyze_document_request(std::string index_name, std::string encoded_document, const analyze_document_options::built& options)
 {
 
-    core::operations::management::search_index_analyze_document_request request{ std::move(index_name), std::move(encoded_document), {}, options.timeout };
+    core::operations::management::search_index_analyze_document_request request{
+        std::move(index_name), std::move(encoded_document), {}, options.timeout
+    };
     return request;
 }
 
@@ -60,6 +62,6 @@ initiate_analyze_document_operation(std::shared_ptr<couchbase::core::cluster> co
     core->execute(std::move(request),
                   [handler = std::move(handler)](operations::management::search_index_analyze_document_response resp) mutable {
                       return handler(build_context(resp), resp.analysis);
-    });
+                  });
 }
 } // namespace couchbase::core::impl

@@ -48,7 +48,9 @@ build_resume_ingest_request(std::string index_name, const resume_ingest_search_i
 }
 
 void
-search_index_manager::resume_ingest(std::string index_name, const couchbase::resume_ingest_search_index_options& options, couchbase::resume_ingest_search_index_handler&& handler) const
+search_index_manager::resume_ingest(std::string index_name,
+                                    const couchbase::resume_ingest_search_index_options& options,
+                                    couchbase::resume_ingest_search_index_handler&& handler) const
 {
     auto request = build_resume_ingest_request(std::move(index_name), options.build());
 

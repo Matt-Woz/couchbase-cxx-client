@@ -48,14 +48,16 @@ build_drop_index_request(std::string index_name, const drop_search_index_options
 }
 
 void
-search_index_manager::drop_index(std::string index_name, const couchbase::drop_search_index_options& options, couchbase::drop_search_index_handler&& handler) const
+search_index_manager::drop_index(std::string index_name,
+                                 const couchbase::drop_search_index_options& options,
+                                 couchbase::drop_search_index_handler&& handler) const
 {
     auto request = build_drop_index_request(std::move(index_name), options.build());
 
     core_->execute(std::move(request),
                    [handler = std::move(handler)](core::operations::management::search_index_drop_response resp) mutable {
                        return handler(build_context(resp));
-    });
+                   });
 }
 
 auto

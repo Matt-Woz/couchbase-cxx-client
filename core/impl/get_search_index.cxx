@@ -66,19 +66,21 @@ map_search_index(const couchbase::core::management::search::index& index)
 }
 
 void
-search_index_manager::get_index(std::string index_name, const couchbase::get_search_index_options& options, couchbase::get_search_index_handler&& handler) const
+search_index_manager::get_index(std::string index_name,
+                                const couchbase::get_search_index_options& options,
+                                couchbase::get_search_index_handler&& handler) const
 {
     auto request = build_get_index_request(std::move(index_name), options.build());
 
     core_->execute(std::move(request),
                    [handler = std::move(handler)](core::operations::management::search_index_get_response resp) mutable {
                        return handler(build_context(resp), map_search_index(resp.index));
-    });
+                   });
 }
 
 auto
 search_index_manager::get_index(std::string index_name, const couchbase::get_search_index_options& options) const
--> std::future<std::pair<manager_error_context, management::search::index>>
+  -> std::future<std::pair<manager_error_context, management::search::index>>
 {
     auto barrier = std::make_shared<std::promise<std::pair<manager_error_context, management::search::index>>>();
     get_index(std::move(index_name), options, [barrier](auto ctx, auto result) mutable {

@@ -48,7 +48,9 @@ build_allow_querying_request(std::string index_name, const allow_querying_search
 }
 
 void
-search_index_manager::allow_querying(std::string index_name, const couchbase::allow_querying_search_index_options& options, couchbase::allow_querying_search_index_handler&& handler) const
+search_index_manager::allow_querying(std::string index_name,
+                                     const couchbase::allow_querying_search_index_options& options,
+                                     couchbase::allow_querying_search_index_handler&& handler) const
 {
     auto request = build_allow_querying_request(std::move(index_name), options.build());
 

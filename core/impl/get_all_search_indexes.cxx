@@ -65,7 +65,6 @@ map_search_index(const couchbase::core::management::search::index& index)
     return public_index;
 }
 
-
 static std::vector<couchbase::management::search::index>
 map_all_search_indexes(const std::vector<couchbase::core::management::search::index>& indexes)
 {
@@ -78,7 +77,8 @@ map_all_search_indexes(const std::vector<couchbase::core::management::search::in
 }
 
 void
-search_index_manager::get_all_indexes(const couchbase::get_all_search_indexes_options& options, couchbase::get_all_search_indexes_handler&& handler) const
+search_index_manager::get_all_indexes(const couchbase::get_all_search_indexes_options& options,
+                                      couchbase::get_all_search_indexes_handler&& handler) const
 {
     auto request = build_get_all_indexes_request(options.build());
 
@@ -93,9 +93,8 @@ search_index_manager::get_all_indexes(const couchbase::get_all_search_indexes_op
   -> std::future<std::pair<manager_error_context, std::vector<management::search::index>>>
 {
     auto barrier = std::make_shared<std::promise<std::pair<manager_error_context, std::vector<management::search::index>>>>();
-    get_all_indexes(options, [barrier](auto ctx, auto result) mutable {
-        barrier->set_value(std::make_pair(std::move(ctx), std::move(result)));
-    });
+    get_all_indexes(options,
+                    [barrier](auto ctx, auto result) mutable { barrier->set_value(std::make_pair(std::move(ctx), std::move(result))); });
     return barrier->get_future();
 }
 } // namespace couchbase
