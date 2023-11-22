@@ -3739,7 +3739,7 @@ TEST_CASE("integration: search index management analyze document", "[integration
 
         couchbase::manager_error_context ctx;
         std::string analysis;
-        std::pair<couchbase::manager_error_context, std::string> result;
+        std::pair<couchbase::manager_error_context, std::vector<std::string>> result;
         bool operation_completed = test::utils::wait_until([&c, &index_name, &result]() {
             tao::json::value basic_doc = {
                 { "name", "hello world" },

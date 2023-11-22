@@ -138,9 +138,9 @@ class search_index_manager
 
     template<typename Document>
     [[nodiscard]] auto analyze_document(std::string index_name, Document document, const analyze_document_options& options = {}) const
-      -> std::future<std::pair<manager_error_context, std::string>>
+      -> std::future<std::pair<manager_error_context, std::vector<std::string>>>
     {
-        auto barrier = std::make_shared<std::promise<std::pair<manager_error_context, std::string>>>();
+        auto barrier = std::make_shared<std::promise<std::pair<manager_error_context, std::vector<std::string>>>>();
         analyze_document(std::move(index_name), document, options, [barrier](auto ctx, auto result) mutable {
             barrier->set_value(std::make_pair(std::move(ctx), std::move(result)));
         });

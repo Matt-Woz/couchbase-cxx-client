@@ -20,6 +20,7 @@
 
 #include "core/cluster.hxx"
 #include "core/operations/management/search_index_analyze_document.hxx"
+#include "core/utils/json.hxx"
 
 #include <utility>
 
@@ -50,6 +51,23 @@ build_analyze_document_request(std::string index_name, std::string encoded_docum
     return request;
 }
 
+static std::vector<std::string>
+convert_analysis(const std::string& analysis)
+{
+    std::vector<std::string> result;
+
+    if (analysis.empty()) {
+        return result;
+    }
+
+    auto parsed = core::utils::json::parse(analysis);
+    auto analyses = parsed.get_array();
+    for (auto const& object: analyses) {
+        result.emplace_back(core::utils::json::generate(object));
+    }
+    return result;
+}
+
 void
 initiate_analyze_document_operation(std::shared_ptr<couchbase::core::cluster> core,
                                     std::string index_name,
@@ -61,7 +79,7 @@ initiate_analyze_document_operation(std::shared_ptr<couchbase::core::cluster> co
 
     core->execute(std::move(request),
                   [handler = std::move(handler)](operations::management::search_index_analyze_document_response resp) mutable {
-                      return handler(build_context(resp), resp.analysis);
+                      return handler(build_context(resp), convert_analysis(resp.analysis));
                   });
 }
 } // namespace couchbase::core::impl

@@ -40,7 +40,7 @@ struct analyze_document_options : public common_options<analyze_document_options
   private:
 };
 
-using analyze_document_handler = std::function<void(couchbase::manager_error_context, std::string)>;
+using analyze_document_handler = std::function<void(couchbase::manager_error_context, std::vector<std::string>)>;
 
 #ifndef COUCHBASE_CXX_CLIENT_DOXYGEN
 namespace core
