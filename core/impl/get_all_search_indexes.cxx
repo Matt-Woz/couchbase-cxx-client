@@ -57,11 +57,15 @@ map_search_index(const couchbase::core::management::search::index& index)
     public_index.params_json = index.params_json;
 
     public_index.source_name = index.source_name;
-    public_index.source_params_json = index.source_params_json;
     public_index.source_type = index.source_type;
     public_index.source_uuid = index.source_uuid;
 
-    public_index.plan_params_json = index.plan_params_json;
+    if (index.plan_params_json != "{}") {
+        public_index.plan_params_json = index.plan_params_json;
+    }
+    if (index.source_params_json != "{}") {
+        public_index.source_params_json = index.source_params_json;
+    }
     return public_index;
 }
 

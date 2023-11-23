@@ -53,26 +53,33 @@ map_search_index(const couchbase::management::search::index& index)
     couchbase::core::management::search::index search_index{};
     search_index.name = index.name;
     search_index.type = index.type;
-
-    search_index.source_name = index.source_name;
     search_index.source_type = index.source_type;
 
     if (index.uuid.has_value()) {
         search_index.uuid = index.uuid.value();
     }
     if (index.params_json.has_value()) {
-        search_index.params_json = index.params_json.value();
+            search_index.params_json = index.params_json.value();
     }
-    if (index.source_params_json.has_value()) {
-        search_index.source_params_json = index.source_params_json.value();
+    // Below marked as omitempty
+    if (!index.source_name.empty()) {
+        search_index.source_name = index.source_name;
     }
     if (index.source_uuid.has_value()) {
-        search_index.source_uuid = index.source_uuid.value();
+        if (!index.source_uuid.value().empty()) {
+            search_index.source_uuid = index.source_uuid.value();
+        }
+    }
+    if (index.source_params_json.has_value()) {
+        if (index.source_params_json.value() != "{}" || !index.source_params_json.value().empty()) {
+            search_index.source_params_json = index.source_params_json.value();
+        }
     }
     if (index.plan_params_json.has_value()) {
-        search_index.plan_params_json = index.plan_params_json.value();
+        if (index.plan_params_json.value() != "{}" || !index.plan_params_json->empty()) {
+            search_index.plan_params_json = index.plan_params_json.value();
+        }
     }
-
     return search_index;
 }
 
