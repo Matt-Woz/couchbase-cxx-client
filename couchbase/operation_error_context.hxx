@@ -32,6 +32,8 @@ class operation_error_context
 
     [[nodiscard]] auto to_json() const -> std::string;
 
+    [[nodiscard]] auto retry_attempts() const -> std::uint64_t;
+
   private:
     core_json_context ctx_;
 };

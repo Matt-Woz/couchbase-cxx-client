@@ -41,4 +41,13 @@ operation_error_context::to_json() const -> std::string
 {
     return tao::json::to_string(ctx_);
 }
+
+auto
+operation_error_context::retry_attempts() const -> std::uint64_t
+{
+    if (const auto& retry_attempts = ctx_.find("retry_attempts");  retry_attempts != nullptr) {
+        return ctx_.at("retry_attempts").get_unsigned();
+    }
+    return 0;
+}
 } // namespace couchbase

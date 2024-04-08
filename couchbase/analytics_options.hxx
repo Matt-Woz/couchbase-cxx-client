@@ -23,6 +23,7 @@
 #include <couchbase/codec/tao_json_serializer.hxx>
 #include <couchbase/common_options.hxx>
 #include <couchbase/mutation_state.hxx>
+#include <couchbase/error.hxx>
 
 #include <chrono>
 #include <functional>
@@ -356,4 +357,6 @@ struct analytics_options : public common_options<analytics_options> {
  * @uncommitted
  */
 using analytics_handler = std::function<void(couchbase::analytics_error_context, analytics_result)>;
+
+using analytics_handler_with_error = std::function<void(couchbase::error, analytics_result)>;
 } // namespace couchbase

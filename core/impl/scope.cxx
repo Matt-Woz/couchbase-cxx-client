@@ -25,6 +25,8 @@
 #include "internal_search_row_locations.hxx"
 #include "query.hxx"
 #include "search.hxx"
+#include "error_context_to_json.hxx"
+
 
 #include <couchbase/bucket.hxx>
 #include <couchbase/collection.hxx>
@@ -36,6 +38,37 @@
 
 namespace couchbase
 {
+namespace
+{
+couchbase::error
+query_error_context_to_error(const query_error_context& ctx)
+{
+    return { ctx.ec(),
+             ctx.ec().message(),
+             operation_error_context{ core::impl::query_error_context_to_json(ctx) } };
+}
+
+couchbase::error
+search_error_context_to_error(const search_error_context& ctx)
+{
+    return {
+        ctx.ec(),
+        ctx.ec().message(),
+        operation_error_context{ core::impl::search_error_context_to_json(ctx) }
+    };
+}
+
+couchbase::error
+analytics_error_context_to_error(const analytics_error_context& ctx)
+{
+    return {
+        ctx.ec(),
+        ctx.ec().message(),
+        operation_error_context{ core::impl::analytics_error_context_to_json(ctx) }
+    };
+}
+} // namespace
+
 class scope_impl
 {
   public:
@@ -69,11 +102,26 @@ class scope_impl
           [handler = std::move(handler)](auto resp) { return handler(core::impl::build_context(resp), core::impl::build_result(resp)); });
     }
 
+    void query_with_error(std::string statement, query_options::built options, query_with_error_handler&& handler) const
+    {
+        return core_.execute(
+          core::impl::build_query_request(std::move(statement), query_context_, std::move(options)),
+          [handler = std::move(handler)](auto resp) { return handler(query_error_context_to_error(core::impl::build_context(resp)), core::impl::build_result(resp)); });
+    }
+
     void analytics_query(std::string statement, analytics_options::built options, analytics_handler&& handler) const
     {
         return core_.execute(core::impl::build_analytics_request(std::move(statement), std::move(options), bucket_name_, name_),
                              [handler = std::move(handler)](auto resp) mutable {
                                  return handler(core::impl::build_context(resp), core::impl::build_result(resp));
+                             });
+    }
+
+    void analytics_query_with_error(std::string statement, analytics_options::built options, analytics_handler_with_error&& handler) const
+    {
+        return core_.execute(core::impl::build_analytics_request(std::move(statement), std::move(options), bucket_name_, name_),
+                             [handler = std::move(handler)](auto resp) mutable {
+                                 return handler(analytics_error_context_to_error(core::impl::build_context(resp)), core::impl::build_result(resp));
                              });
     }
 
@@ -95,6 +143,14 @@ class scope_impl
                              [handler = std::move(handler)](auto&& resp) mutable {
                                  return handler(search_error_context{ internal_search_error_context{ resp } },
                                                 search_result{ internal_search_result{ resp } });
+                             });
+    }
+
+    void search_with_error(std::string index_name, couchbase::search_request request, search_options::built options, search_with_error_handler&& handler) const
+    {
+        return core_.execute(core::impl::build_search_request(std::move(index_name), std::move(request), options, bucket_name_, name_),
+                             [handler = std::move(handler)](auto&& resp) mutable {
+                                 return handler(search_error_context_to_error( search_error_context{ internal_search_error_context{ resp } }), search_result{ internal_search_result{ resp } });
                              });
     }
 
@@ -144,6 +200,21 @@ scope::query(std::string statement, const query_options& options) const -> std::
 }
 
 void
+scope::query_with_error(std::string statement, const query_options& options, query_with_error_handler&& handler) const
+{
+    return impl_->query_with_error(std::move(statement), options.build(), std::move(handler));
+}
+
+auto
+scope::query_with_error(std::string statement, const query_options& options) const -> std::future<std::pair<error, query_result>>
+{
+    auto barrier = std::make_shared<std::promise<std::pair<error, query_result>>>();
+    auto future = barrier->get_future();
+    query_with_error(std::move(statement), options, [barrier](auto ctx, auto result) { barrier->set_value({ std::move(ctx), std::move(result) }); });
+    return future;
+}
+
+void
 scope::analytics_query(std::string statement, const analytics_options& options, analytics_handler&& handler) const
 {
     return impl_->analytics_query(std::move(statement), options.build(), std::move(handler));
@@ -162,6 +233,24 @@ scope::analytics_query(std::string statement, const analytics_options& options) 
 }
 
 void
+scope::analytics_query_with_error(std::string statement, const analytics_options& options, analytics_handler_with_error&& handler) const
+{
+    return impl_->analytics_query_with_error(std::move(statement), options.build(), std::move(handler));
+}
+
+auto
+scope::analytics_query_with_error(std::string statement, const analytics_options& options) const
+  -> std::future<std::pair<error, analytics_result>>
+{
+    auto barrier = std::make_shared<std::promise<std::pair<error, analytics_result>>>();
+    auto future = barrier->get_future();
+    analytics_query_with_error(std::move(statement), options, [barrier](auto error, auto result) {
+        barrier->set_value({ std::move(error), std::move(result) });
+    });
+    return future;
+}
+
+void
 scope::search(std::string index_name, search_request request, const search_options& options, search_handler&& handler) const
 {
     return impl_->search(std::move(index_name), std::move(request), options.build(), std::move(handler));
@@ -175,6 +264,24 @@ scope::search(std::string index_name, search_request request, const search_optio
     auto future = barrier->get_future();
     search(std::move(index_name), std::move(request), options, [barrier](auto ctx, auto result) {
         barrier->set_value({ std::move(ctx), std::move(result) });
+    });
+    return future;
+}
+
+void
+scope::search_with_error(std::string index_name, search_request request, const search_options& options, search_with_error_handler&& handler) const
+{
+    return impl_->search_with_error(std::move(index_name), std::move(request), options.build(), std::move(handler));
+}
+
+auto
+scope::search_with_error(std::string index_name, search_request request, const search_options& options) const
+  -> std::future<std::pair<error, search_result>>
+{
+    auto barrier = std::make_shared<std::promise<std::pair<error, search_result>>>();
+    auto future = barrier->get_future();
+    search_with_error(std::move(index_name), std::move(request), options, [barrier](auto error, auto result) {
+        barrier->set_value({ std::move(error), std::move(result) });
     });
     return future;
 }

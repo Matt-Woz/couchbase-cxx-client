@@ -273,6 +273,47 @@ class cluster
       -> std::future<std::pair<search_error_context, search_result>>;
 
     /**
+     * Performs a request against the full text search services.
+     *
+     * This can be used to perform a traditional FTS query, and/or a vector search.
+     *
+     * @param index_name name of the search index
+     * @param request request object, see @ref search_request for more details.
+     * @param options options to customize the query request.
+     * @param handler the handler that implements @ref search_handler
+     *
+     * @exception errc::common::ambiguous_timeout
+     * @exception errc::common::unambiguous_timeout
+     *
+     * @see https://docs.couchbase.com/server/current/fts/fts-introduction.html
+     *
+     * @since 1.0.0
+     * @volatile
+     */
+    void search_with_error(std::string index_name, search_request request, const search_options& options, search_with_error_handler&& handler) const;
+
+    /**
+     * Performs a request against the full text search services.
+     *
+     * This can be used to perform a traditional FTS query, and/or a vector search.
+     *
+     * @param index_name name of the search index
+     * @param request request object, see @ref search_request for more details.
+     * @param options options to customize the query request.
+     * @return future object that carries result of the operation
+     *
+     * @exception errc::common::ambiguous_timeout
+     * @exception errc::common::unambiguous_timeout
+     *
+     * @see https://docs.couchbase.com/server/current/fts/fts-introduction.html
+     *
+     * @since 1.0.0
+     * @volatile
+     */
+    [[nodiscard]] auto search_with_error(std::string index_name, search_request request, const search_options& options = {}) const
+      -> std::future<std::pair<error, search_result>>;
+
+    /**
      * Performs a query against the analytics services.
      *
      * @param statement the query statement.
@@ -288,6 +329,38 @@ class cluster
      * @committed
      */
     void analytics_query(std::string statement, const analytics_options& options, analytics_handler&& handler) const;
+
+    /**
+     * Performs a query against the analytics services.
+     *
+     * @param statement the query statement.
+     * @param options options to customize the query request.
+     * @return future object that carries result of the operation
+     *
+     * @see https://docs.couchbase.com/server/current/analytics/introduction.html
+     *
+     * @since 1.0.0
+     * @committed
+     */
+    [[nodiscard]] auto analytics_query_with_error(std::string statement, const analytics_options& options = {}) const
+      -> std::future<std::pair<error, analytics_result>>;
+
+    /**
+     * Performs a query against the analytics services.
+     *
+     * @param statement the query statement.
+     * @param options options to customize the query request.
+     * @param handler the handler that implements @ref query_handler
+     *
+     * @exception errc::common::ambiguous_timeout
+     * @exception errc::common::unambiguous_timeout
+     *
+     * @see https://docs.couchbase.com/server/current/analytics/introduction.html
+     *
+     * @since 1.0.0
+     * @committed
+     */
+    void analytics_query_with_error(std::string statement, const analytics_options& options, analytics_handler_with_error&& handler) const;
 
     /**
      * Performs a query against the analytics services.

@@ -159,6 +159,26 @@ query_error_context_to_error(const query_error_context& ctx)
              operation_error_context{ core::impl::query_error_context_to_json(ctx) } };
 }
 
+couchbase::error
+search_error_context_to_error(const search_error_context& ctx)
+{
+    return {
+        ctx.ec(),
+          ctx.ec().message(),
+          operation_error_context{ core::impl::search_error_context_to_json(ctx) }
+    };
+}
+
+couchbase::error
+analytics_error_context_to_error(const analytics_error_context& ctx)
+{
+    return {
+        ctx.ec(),
+        ctx.ec().message(),
+        operation_error_context{ core::impl::analytics_error_context_to_json(ctx) }
+    };
+}
+
 } // namespace
 
 class cluster_impl : public std::enable_shared_from_this<cluster_impl>
@@ -212,6 +232,13 @@ class cluster_impl : public std::enable_shared_from_this<cluster_impl>
           [handler = std::move(handler)](auto resp) { return handler(core::impl::build_context(resp), core::impl::build_result(resp)); });
     }
 
+    void analytics_query_with_error(std::string statement, analytics_options::built options, analytics_handler_with_error&& handler) const
+    {
+        return core_.execute(
+          core::impl::build_analytics_request(std::move(statement), std::move(options), {}, {}),
+          [handler = std::move(handler)](auto resp) { return handler(analytics_error_context_to_error(core::impl::build_context(resp)), core::impl::build_result(resp)); });
+    }
+
     void search_query(std::string index_name,
                       const class search_query& query,
                       const search_options::built& options,
@@ -248,6 +275,17 @@ class cluster_impl : public std::enable_shared_from_this<cluster_impl>
                              [handler = std::move(handler)](auto resp) mutable {
                                  return handler(search_error_context{ internal_search_error_context{ resp } },
                                                 search_result{ internal_search_result{ resp } });
+                             });
+    }
+
+    void search_with_error(std::string index_name,
+                couchbase::search_request request,
+                const search_options::built& options,
+                search_with_error_handler&& handler) const
+    {
+        return core_.execute(core::impl::build_search_request(std::move(index_name), std::move(request), options, {}, {}),
+                             [handler = std::move(handler)](auto resp) mutable {
+                                 return handler(search_error_context_to_error( search_error_context{ internal_search_error_context{ resp } }), search_result{ internal_search_result{ resp } });
                              });
     }
 
@@ -358,6 +396,24 @@ cluster::analytics_query(std::string statement, const analytics_options& options
 }
 
 void
+cluster::analytics_query_with_error(std::string statement, const analytics_options& options, analytics_handler_with_error&& handler) const
+{
+    impl_->analytics_query_with_error(std::move(statement), options.build(), std::move(handler));
+}
+
+auto
+cluster::analytics_query_with_error(std::string statement, const analytics_options& options) const
+  -> std::future<std::pair<error, analytics_result>>
+{
+    auto barrier = std::make_shared<std::promise<std::pair<error, analytics_result>>>();
+    auto future = barrier->get_future();
+    analytics_query_with_error(std::move(statement), options, [barrier](auto ctx, auto result) {
+        barrier->set_value({ std::move(ctx), std::move(result) });
+    });
+    return future;
+}
+
+void
 cluster::search_query(std::string index_name,
                       const class search_query& query,
                       const search_options& options,
@@ -417,6 +473,23 @@ cluster::search(std::string index_name, search_request request, const search_opt
 {
     auto barrier = std::make_shared<std::promise<std::pair<search_error_context, search_result>>>();
     search(std::move(index_name), std::move(request), options, [barrier](auto ctx, auto result) mutable {
+        barrier->set_value(std::make_pair(std::move(ctx), std::move(result)));
+    });
+    return barrier->get_future();
+}
+
+void
+cluster::search_with_error(std::string index_name, search_request request, const search_options& options, search_with_error_handler&& handler) const
+{
+    return impl_->search_with_error(std::move(index_name), std::move(request), options.build(), std::move(handler));
+}
+
+auto
+cluster::search_with_error(std::string index_name, search_request request, const search_options& options) const
+  -> std::future<std::pair<error, search_result>>
+{
+    auto barrier = std::make_shared<std::promise<std::pair<error, search_result>>>();
+    search_with_error(std::move(index_name), std::move(request), options, [barrier](auto ctx, auto result) mutable {
         barrier->set_value(std::make_pair(std::move(ctx), std::move(result)));
     });
     return barrier->get_future();

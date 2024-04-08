@@ -16,6 +16,7 @@
  */
 
 #include "error_context_to_json.hxx"
+#include "couchbase/analytics_error_context.hxx"
 
 #include <couchbase/fmt/cas.hxx>
 #include <couchbase/fmt/key_value_error_map_attribute.hxx>
@@ -143,6 +144,100 @@ query_error_context_to_json(const query_error_context& ctx) -> tao::json::value
         json["last_dispatched_to"] = val.value();
     }
 
+    return json;
+}
+
+auto
+search_error_context_to_json(const search_error_context& ctx) -> tao::json::value
+{
+    tao::json::value json = {
+        {
+          "ec",
+          tao::json::value{
+            { "value", ctx.ec().value() },
+            { "message", ctx.ec().message() },
+          },
+        },
+        { "operation_id", ctx.operation_id() },
+        { "retry_attempts", ctx.retry_attempts() },
+        { "client_context_id", ctx.client_context_id() },
+        { "query", ctx.query() },
+        { "method", ctx.method() },
+        { "path", ctx.path() },
+        { "http_status", ctx.http_status() },
+        { "http_body", ctx.http_body() },
+        { "hostname", ctx.hostname() },
+        { "port", ctx.port() },
+    };
+
+    if (const auto& val = ctx.parameters(); val.has_value()) {
+        json["parameters"] = val.value();
+    }
+
+    if (const auto& reasons = ctx.retry_reasons(); !reasons.empty()) {
+        tao::json::value reasons_json = tao::json::empty_array;
+        for (const auto& reason : reasons) {
+            reasons_json.emplace_back(fmt::format("{}", reason));
+        }
+        json["retry_reasons"] = reasons_json;
+    }
+    if (const auto& val = ctx.last_dispatched_from(); val.has_value()) {
+        json["last_dispatched_from"] = val.value();
+    }
+    if (const auto& val = ctx.last_dispatched_to(); val.has_value()) {
+        json["last_dispatched_to"] = val.value();
+    }
+
+    return json;
+}
+
+auto
+analytics_error_context_to_json(const analytics_error_context& ctx) -> tao::json::value
+{
+    tao::json::value json = {
+        {
+          "ec",
+          tao::json::value{
+            { "value", ctx.ec().value() },
+            { "message", ctx.ec().message() },
+          },
+        },
+        { "operation_id", ctx.operation_id() },
+        { "retry_attempts", ctx.retry_attempts() },
+        { "client_context_id", ctx.client_context_id() },
+        { "statement", ctx.statement() },
+        { "method", ctx.method() },
+        { "path", ctx.path() },
+        { "http_status", ctx.http_status() },
+        { "http_body", ctx.http_body() },
+        { "hostname", ctx.hostname() },
+        { "port", ctx.port() },
+    };
+
+    if (const auto& val = ctx.parameters(); val.has_value()) {
+        json["parameters"] = val.value();
+    }
+
+    if (ctx.first_error_code() > 0) {
+        json["first_error_code"] = ctx.first_error_code();
+    }
+    if (!ctx.first_error_message().empty()) {
+        json["first_error_message"] = ctx.first_error_message();
+    }
+
+    if (const auto& reasons = ctx.retry_reasons(); !reasons.empty()) {
+        tao::json::value reasons_json = tao::json::empty_array;
+        for (const auto& reason : reasons) {
+            reasons_json.emplace_back(fmt::format("{}", reason));
+        }
+        json["retry_reasons"] = reasons_json;
+    }
+    if (const auto& val = ctx.last_dispatched_from(); val.has_value()) {
+        json["last_dispatched_from"] = val.value();
+    }
+    if (const auto& val = ctx.last_dispatched_to(); val.has_value()) {
+        json["last_dispatched_to"] = val.value();
+    }
     return json;
 }
 

@@ -62,6 +62,7 @@ main()
         auto [err1, doc_not_found_resp] = collection.get_with_error("does-not-exist").get();
         if (err1) { // Checks for err1.ec() != 0;
             std::cout << err1.ec().message() << "\n" << err1.ctx().to_string() << "\n" << err1.ctx().to_json() << "\n";
+            std::cout << "Retry attempts: " << err1.ctx().retry_attempts() << "\n";
         }
 
         // shouldn't error
