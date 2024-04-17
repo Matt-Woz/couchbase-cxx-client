@@ -156,13 +156,13 @@ transactions::run(const couchbase::transactions::transaction_options& config, lo
     return wrap_run(*this, config, max_attempts_, std::move(code));
 }
 
-std::pair<couchbase::transaction_error_context, couchbase::transactions::transaction_result>
+std::pair<couchbase::error, couchbase::transactions::transaction_result>
 transactions::run(couchbase::transactions::txn_logic&& code, const couchbase::transactions::transaction_options& config)
 {
     try {
         return { {}, wrap_run(*this, config, max_attempts_, std::move(code)) };
     } catch (const transaction_exception& e) {
-        // get transaction_error_context from e and return it in the transaction_result
+        // get couchbase::error from e and return it in the transaction_result
         return e.get_transaction_result();
     }
 }

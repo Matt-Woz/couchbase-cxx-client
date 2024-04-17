@@ -1127,7 +1127,7 @@ attempt_context_impl::do_core_query(const std::string& statement,
     return f.get();
 }
 
-std::pair<couchbase::transaction_op_error_context, couchbase::transactions::transaction_query_result>
+std::pair<couchbase::error, couchbase::transactions::transaction_query_result>
 attempt_context_impl::do_public_query(const std::string& statement,
                                       const couchbase::transactions::transaction_query_options& opts,
                                       std::optional<std::string> query_context)
@@ -1136,13 +1136,13 @@ attempt_context_impl::do_public_query(const std::string& statement,
         auto result = do_core_query(statement, opts, query_context);
         return core::impl::build_transaction_query_result(result);
     } catch (const transaction_operation_failed& e) {
-        return { e.get_error_ctx(), {} };
+        return { e.get_error(), {} };
     } catch (const op_exception& qe) {
-        return { qe.ctx(), {} };
+        return { qe.error(), {} };
     } catch (...) {
         // should not be necessary, but just in case...
-        transaction_op_error_context ctx(couchbase::errc::transaction_op::unknown);
-        return { ctx, {} };
+        couchbase::error err(couchbase::errc::transaction_op::unknown, "An unknown error occurred");
+        return { err, {} };
     }
 }
 
@@ -2372,8 +2372,8 @@ attempt_context_impl::create_staged_insert_error_handler(const core::document_id
                                     CB_ATTEMPT_CTX_LOG_TRACE(this, "doc {} not in txn - was inserted outside txn", id);
                                     return op_completed_with_error(
                                       std::forward<Handler>(cb),
-                                      document_exists(
-                                        { couchbase::errc::transaction_op::document_exists_exception, key_value_error_context() }));
+                                      document_exists({ couchbase::errc::transaction_op::document_exists_exception,
+                                                        fmt::format("document {} was inserted outside the transaction", id) }));
                                 }
                                 if (doc->links().staged_attempt_id() == this->id()) {
                                     if (doc->links().staged_operation_id() == op_id) {

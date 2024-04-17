@@ -19,6 +19,7 @@
 #include "core/error_context/query.hxx"
 #include "error_class.hxx"
 
+#include <couchbase/error.hxx>
 #include <couchbase/error_codes.hxx>
 #include <couchbase/transactions/transaction_result.hxx>
 
@@ -91,9 +92,9 @@ class transaction_exception : public std::runtime_error
      *
      * @returns Internal state of transaction.
      */
-    std::pair<couchbase::transaction_error_context, couchbase::transactions::transaction_result> get_transaction_result() const
+    std::pair<couchbase::error, couchbase::transactions::transaction_result> get_transaction_result() const
     {
-        return { error_context(), { result_.transaction_id, result_.unstaging_complete } };
+        return { {}, { result_.transaction_id, result_.unstaging_complete } };
     }
 
     /**
@@ -114,7 +115,7 @@ class transaction_exception : public std::runtime_error
         return type_;
     }
 
-    [[nodiscard]] transaction_error_context error_context() const
+    [[nodiscard]] couchbase::error error() const
     {
         std::error_code ec{};
         switch (type_) {
@@ -128,20 +129,20 @@ class transaction_exception : public std::runtime_error
                 ec = errc::transaction::ambiguous;
                 break;
         }
-        return { ec, transaction_op_errc_from_external_exception(cause_) };
+        return { ec, "", {}, { transaction_op_errc_from_external_exception(cause_), "" } };
     }
 };
 class op_exception : public std::runtime_error
 {
   private:
     external_exception cause_;
-    transaction_op_error_context ctx_;
+    couchbase::error error_;
 
   public:
-    explicit op_exception(transaction_op_error_context ctx, external_exception cause = COUCHBASE_EXCEPTION)
-      : std::runtime_error(ctx.ec().message())
+    explicit op_exception(couchbase::error err, external_exception cause = COUCHBASE_EXCEPTION)
+      : std::runtime_error(err.message())
       , cause_(cause)
-      , ctx_(std::move(ctx))
+      , error_(std::move(err))
     {
     }
 
@@ -150,17 +151,17 @@ class op_exception : public std::runtime_error
         return cause_;
     }
 
-    [[nodiscard]] const transaction_op_error_context& ctx() const
+    [[nodiscard]] const couchbase::error& error() const
     {
-        return ctx_;
+        return error_;
     }
 };
 
 class document_not_found : public op_exception
 {
   public:
-    explicit document_not_found(transaction_op_error_context ctx)
-      : op_exception(std::move(ctx), DOCUMENT_NOT_FOUND_EXCEPTION)
+    explicit document_not_found(couchbase::error err)
+      : op_exception(std::move(err), DOCUMENT_NOT_FOUND_EXCEPTION)
     {
     }
 };
@@ -168,8 +169,8 @@ class document_not_found : public op_exception
 class document_exists : public op_exception
 {
   public:
-    explicit document_exists(transaction_op_error_context ctx)
-      : op_exception(std::move(ctx), DOCUMENT_EXISTS_EXCEPTION)
+    explicit document_exists(couchbase::error err)
+      : op_exception(std::move(err), DOCUMENT_EXISTS_EXCEPTION)
     {
     }
 };
@@ -177,8 +178,8 @@ class document_exists : public op_exception
 class query_attempt_not_found : public op_exception
 {
   public:
-    query_attempt_not_found(transaction_op_error_context ctx)
-      : op_exception(std::move(ctx))
+    query_attempt_not_found(couchbase::error err)
+      : op_exception(std::move(err))
     {
     }
 };
@@ -186,8 +187,8 @@ class query_attempt_not_found : public op_exception
 class query_cas_mismatch : public op_exception
 {
   public:
-    query_cas_mismatch(transaction_op_error_context ctx)
-      : op_exception(std::move(ctx))
+    query_cas_mismatch(couchbase::error err)
+      : op_exception(std::move(err))
     {
     }
 };
@@ -195,8 +196,8 @@ class query_cas_mismatch : public op_exception
 class query_attempt_expired : public op_exception
 {
   public:
-    query_attempt_expired(transaction_op_error_context ctx)
-      : op_exception(std::move(ctx))
+    query_attempt_expired(couchbase::error err)
+      : op_exception(std::move(err))
     {
     }
 };
@@ -204,8 +205,8 @@ class query_attempt_expired : public op_exception
 class query_parsing_failure : public op_exception
 {
   public:
-    query_parsing_failure(transaction_op_error_context ctx)
-      : op_exception(std::move(ctx), PARSING_FAILURE)
+    query_parsing_failure(couchbase::error err)
+      : op_exception(std::move(err), PARSING_FAILURE)
     {
     }
 };

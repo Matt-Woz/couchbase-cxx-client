@@ -56,12 +56,6 @@ class transaction_get_result
     transaction_get_result(const transaction_get_result& doc) = default;
     transaction_get_result(transaction_get_result&& doc) = default;
 
-    /*
-    transaction_get_result(const transaction_op_error_context& ctx)
-      : couchbase::transactions::transaction_get_result(ctx)
-    {
-    }*/
-
     /** @internal */
     template<typename Content>
     transaction_get_result(core::document_id id,

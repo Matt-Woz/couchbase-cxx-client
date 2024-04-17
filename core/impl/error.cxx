@@ -37,6 +37,12 @@ error::error(std::error_code ec, std::string message, couchbase::error_context c
 {
 }
 
+error::error(std::error_code ec, std::string message)
+  : ec_{ ec }
+  , message_{ std::move(message) }
+{
+}
+
 error::error(std::error_code ec, std::string message, couchbase::error_context ctx, couchbase::error cause)
   : ec_{ ec }
   , message_{ std::move(message) }

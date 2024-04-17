@@ -21,8 +21,6 @@
 #include "core/transactions/result.hxx"
 #include "transaction_context.hxx"
 
-#include <couchbase/transaction_op_error_context.hxx>
-
 #include <algorithm>
 #include <list>
 
@@ -267,10 +265,10 @@ class transaction_operation_failed : public std::runtime_error
         }
     }
 
-    transaction_op_error_context get_error_ctx() const
+    couchbase::error get_error() const
     {
-        errc::transaction_op ec = transaction_op_errc_from_external_exception(cause_);
-        return { ec };
+        std::error_code ec = transaction_op_errc_from_external_exception(cause_);
+        return { ec, ec.message() };
     }
 
   private:

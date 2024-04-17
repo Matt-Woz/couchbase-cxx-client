@@ -22,6 +22,7 @@
 #include "core/cluster.hxx"
 #include "core/operations/document_query.hxx"
 #include "core/utils/binary.hxx"
+#include "error.hxx"
 
 namespace couchbase::core::impl
 {
@@ -187,7 +188,7 @@ build_query_request(std::string statement, std::optional<std::string> query_cont
     return request;
 }
 
-std::pair<couchbase::transaction_op_error_context, couchbase::transactions::transaction_query_result>
+std::pair<couchbase::error, couchbase::transactions::transaction_query_result>
 build_transaction_query_result(operations::query_response resp, std::error_code txn_ec /*defaults to 0*/)
 {
     if (resp.ctx.ec) {
@@ -201,7 +202,7 @@ build_transaction_query_result(operations::query_response resp, std::error_code 
         }
     }
     return {
-        { txn_ec, build_context(resp) },
+        make_error(resp.ctx),
         { query_meta_data{
             std::move(resp.meta.request_id),
             std::move(resp.meta.client_context_id),
