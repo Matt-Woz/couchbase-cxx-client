@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <iostream>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -59,6 +60,9 @@ std::shared_ptr<spdlog::logger> file_logger{};
 std::mutex file_logger_mutex;
 std::atomic_int file_logger_version{ 0 };
 
+std::shared_ptr<couchbase::core::logger::log_callback> log_callback{};
+std::mutex log_callback_mutex;
+
 auto
 get_file_logger() -> std::shared_ptr<spdlog::logger>
 {
@@ -70,6 +74,31 @@ get_file_logger() -> std::shared_ptr<spdlog::logger>
     version = file_logger_version;
   }
   return logger;
+}
+
+auto
+get_custom_callback() -> std::shared_ptr<couchbase::core::logger::log_callback>
+{
+  const std::scoped_lock lock(log_callback_mutex);
+  return log_callback;
+}
+
+void
+register_custom_callback(couchbase::core::logger::log_callback callback)
+{
+  if (callback == nullptr) {
+    return;
+  }
+
+  const std::scoped_lock lock(log_callback_mutex);
+  log_callback = std::make_shared<couchbase::core::logger::log_callback>(std::move(callback));
+}
+
+void
+unregister_custom_callback()
+{
+  const std::scoped_lock lock(log_callback_mutex);
+  log_callback = nullptr;
 }
 
 void
@@ -181,6 +210,14 @@ log(const char* file, int line, const char* function, level lvl, std::string_vie
       spdlog::source_loc{ file, line, function }, translate_level(lvl), msg);
   }
 }
+
+void
+log_custom_logger(const char* file, int line, const char* function, level lvl, std::string_view msg)
+{
+  if (auto callback = get_custom_callback()) {
+    (*callback)(msg, lvl, { file, function, line });
+  }
+}
 } // namespace detail
 
 void
@@ -217,6 +254,12 @@ auto
 is_initialized() -> bool
 {
   return get_file_logger() != nullptr;
+}
+
+auto
+custom_callback_initialized() -> bool
+{
+  return get_custom_callback() != nullptr;
 }
 
 auto
@@ -394,6 +437,18 @@ create_console_logger()
   new_logger->set_level(spdlog::level::info);
   new_logger->set_pattern(log_pattern);
   update_file_logger(new_logger);
+}
+
+void
+register_log_callback(log_callback callback)
+{
+  register_custom_callback(std::move(callback));
+}
+
+void
+unregister_log_callback()
+{
+  unregister_custom_callback();
 }
 
 void
