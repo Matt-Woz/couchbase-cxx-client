@@ -31,4 +31,15 @@ cluster_credentials::requires_tls() const -> bool
   return !certificate_path.empty() && !key_path.empty();
 }
 
+auto
+cluster_credentials::uses_jwt() const -> bool
+{
+  return !jwt_token.empty();
+}
+
+auto
+cluster_credentials::uses_password() const -> bool
+{
+  return !username.empty() && !password.empty();
+}
 } // namespace couchbase::core

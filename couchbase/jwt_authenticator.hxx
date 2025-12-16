@@ -1,6 +1,6 @@
 /* -*- Mode: C++; tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- *   Copyright 2020-2021 Couchbase, Inc.
+ *   Copyright 2020-Present Couchbase, Inc.
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,24 +17,22 @@
 
 #pragma once
 
-#include <optional>
 #include <string>
-#include <vector>
 
-namespace couchbase::core
+namespace couchbase
 {
-struct cluster_credentials {
-  std::string username{};
-  std::string password{};
-  std::string certificate_path{};
-  std::string key_path{};
-  std::string jwt_token{};
-  std::optional<std::vector<std::string>> allowed_sasl_mechanisms{};
+class jwt_authenticator
+{
+public:
+  explicit jwt_authenticator(std::string token)
+    : token_{ std::move(token) }
+  {
+  }
 
-  [[nodiscard]] auto uses_certificate() const -> bool;
-  [[nodiscard]] auto requires_tls() const -> bool;
-  [[nodiscard]] auto uses_jwt() const -> bool;
-  [[nodiscard]] auto uses_password() const -> bool;
+private:
+  std::string token_;
+
+  friend class cluster_options;
+  friend class cluster;
 };
-
-} // namespace couchbase::core
+} // namespace couchbase
